@@ -1,0 +1,30 @@
+@model AARCHIZZ.Models.AdminCategoryDeleteViewModel
+@{
+  ViewData["Title"] = "Delete category";
+}
+<main class="admin-products-page">
+  <div class="container admin-products">
+    <section class="admin-create-panel admin-delete-panel">
+      <p class="eyebrow">Catalogue management</p>
+      <h1>Delete category?</h1>
+      <div asp-validation-summary="ModelOnly" class="admin-form__error" role="alert"></div>
+      @if (Model.ProductCount > 0) {
+      <p class="admin-auth-intro">The category
+        <strong>@Model.Name</strong> has @Model.ProductCount associated product@(Model.ProductCount == 1 ? "" : "s").
+        Reassign or remove those products before deleting this category.</p><a class="button button--dark"
+                                                                             asp-controller="AdminCategories" asp-action="Index">Return to categories <span
+        aria-hidden="true">&rarr;</span></a>
+      } else
+      {
+
+        <p class="admin-auth-intro">You are about to permanently delete
+          <strong>@Model.Name</strong>. This category has no associated products.</p>
+          <form asp-controller="AdminCategories" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+            <label class="admin-form__field admin-product-form__checkbox"><input type="checkbox" name="confirmDeletion" value="true" required /> I understand this permanently deletes the category.</label>
+            <button class="button button--danger" type="submit">Delete permanently <span
+            aria-hidden="true">&rarr;</span></button><a class="admin-auth-back" asp-controller="AdminCategories"
+                                                        asp-action="Index">Cancel</a></form>
+          }
+        </section>
+      </div>
+    </main>

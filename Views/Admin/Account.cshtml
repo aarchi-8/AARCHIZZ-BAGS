@@ -1,0 +1,30 @@
+@model AARCHIZZ.Models.AdminAccountViewModel
+@{
+  ViewData["Title"] = "Account settings";
+}
+
+<main class="admin-auth-page">
+  <section class="admin-auth-panel admin-account-panel" aria-labelledby="account-settings-title">
+    <p class="eyebrow">Owner account</p>
+    <h1 id="account-settings-title">Account settings.</h1>
+    <p class="admin-auth-intro">Current username: <strong>@Model.CurrentUsername</strong></p>
+    <form asp-controller="Admin" asp-action="Account" method="post" class="admin-form">
+      <div asp-validation-summary="ModelOnly" class="admin-form__error" role="alert"></div>
+      <div class="admin-form__field"><label asp-for="CurrentPassword"></label><input asp-for="CurrentPassword"
+                                                                                       autocomplete="current-password" /><span asp-validation-for="CurrentPassword"></span></div>
+        <div class="admin-form__field"><label asp-for="NewUsername"></label><input asp-for="NewUsername"
+                                                                                     autocomplete="username" /><span asp-validation-for="NewUsername"></span></div>
+          <div class="admin-form__field"><label asp-for="NewPassword"></label><input asp-for="NewPassword"
+                                                                                       autocomplete="new-password" /><span asp-validation-for="NewPassword"></span></div>
+            <div class="admin-form__field"><label asp-for="ConfirmNewPassword"></label><input asp-for="ConfirmNewPassword"
+                                                                                                autocomplete="new-password" /><span asp-validation-for="ConfirmNewPassword"></span></div>
+              <button class="button button--dark admin-form__submit" type="submit">Save changes <span
+                aria-hidden="true">&rarr;</span></button>
+              </form>
+              <a class="admin-auth-back" asp-controller="Admin" asp-action="Dashboard">&larr; Back to dashboard</a>
+            </section>
+          </main>
+
+          @section Scripts {
+            <partial name="_ValidationScriptsPartial" />
+          }

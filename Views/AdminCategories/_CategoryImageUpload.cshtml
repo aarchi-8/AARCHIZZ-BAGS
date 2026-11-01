@@ -1,0 +1,20 @@
+@model AARCHIZZ.Models.AdminCategoryFormViewModel
+<div class="admin-category-image" data-category-image-control>
+  <label asp-for="ImageFile" class="admin-category-image__title">Upload Category Image</label>
+  <div class="admin-category-image__picker">
+    <label for="category-image-file" class="button button--light admin-category-image__choose">Choose Image</label>
+    <input asp-for="ImageFile" id="category-image-file" type="file"
+           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+           class="visually-hidden" data-category-image-picker />
+    <span class="admin-category-image__filename" data-category-image-filename>No image selected</span>
+  </div>
+  <span asp-validation-for="ImageFile" class="admin-category-image__error"></span>
+  <small>JPG, JPEG, PNG, or WebP. Maximum 5 MB.</small>
+  <div class="admin-category-image__preview-wrap">
+    <span class="admin-category-image__preview-label">Image preview</span>
+    <img class="admin-category-image__preview" src="@(Model.CurrentImageUrl ?? "/images/category-placeholder.svg")"
+         alt="@(Model.CurrentImageUrl is null ? "Category image placeholder" : "Current category image")"
+         data-category-image-preview data-original-src="@(Model.CurrentImageUrl ?? "/images/category-placeholder.svg")"
+         data-original-alt="@(Model.CurrentImageUrl is null ? "Category image placeholder" : "Current category image")" />
+  </div>
+</div>

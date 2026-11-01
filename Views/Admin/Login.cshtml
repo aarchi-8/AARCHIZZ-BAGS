@@ -1,0 +1,33 @@
+@model AARCHIZZ.Models.AdminLoginViewModel
+@{
+  ViewData["Title"] = "Admin sign in";
+}
+
+<main class="admin-auth-page">
+  <section class="admin-auth-panel" aria-labelledby="admin-login-title">
+    <p class="eyebrow">AARCHIZZ administration</p>
+    <h1 id="admin-login-title">Welcome back.</h1>
+    <p class="admin-auth-intro">Sign in to manage the AARCHIZZ collection.</p>
+    <form asp-controller="Admin" asp-action="Login" method="post" class="admin-form">
+      <input asp-for="ReturnUrl" type="hidden" />
+      <div asp-validation-summary="ModelOnly" class="admin-form__error" role="alert"></div>
+      <div class="admin-form__field">
+        <label asp-for="Username"></label>
+        <input asp-for="Username" autocomplete="username" autofocus />
+        <span asp-validation-for="Username"></span>
+      </div>
+      <div class="admin-form__field">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" autocomplete="current-password" />
+        <span asp-validation-for="Password"></span>
+      </div>
+      <button class="button button--dark admin-form__submit" type="submit">Sign in <span
+        aria-hidden="true">&rarr;</span></button>
+      </form>
+      <a class="admin-auth-back" asp-controller="Home" asp-action="Index">&larr; Return to storefront</a>
+    </section>
+  </main>
+
+  @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+  }

@@ -1,0 +1,77 @@
+@model AARCHIZZ.Models.ShopViewModel
+@{
+  ViewData["Title"] = "Shop All";
+}
+
+<main class="shop-page">
+  <section class="shop-hero">
+    <div class="container">
+      <p class="eyebrow">The complete collection</p>
+      <h1>Shop All</h1>
+      <p>Find the piece that feels like you.</p>
+    </div>
+  </section>
+  <div class="container shop-content">
+    <div class="shop-toolbar">
+      <p class="shop-count">@Model.Products.Count() pieces <span>of @Model.TotalProducts</span></p>
+      <form class="sort-form" asp-controller="Shop" asp-action="Index" method="get">
+        @if (!string.IsNullOrWhiteSpace(Model.SelectedCategory))
+        {
+          <input type="hidden" name="category"
+                 value="@Model.SelectedCategory" />
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+          <input type="hidden" name="search" value="@Model.Search" />
+        }
+        <label for="sort">Sort by</label>
+        <select id="sort" name="sort" onchange="this.form.submit()">
+          <option value="featured" selected="@(Model.Sort == "featured")">Featured</option>
+          <option value="price-asc" selected="@(Model.Sort == "price-asc")">Price: Low to high</option>
+          <option value="price-desc" selected="@(Model.Sort == "price-desc")">Price: High to low</option>
+          <option value="name" selected="@(Model.Sort == "name")">Name</option>
+        </select>
+      </form>
+    </div>
+    <div class="shop-layout">
+      <aside class="shop-filters" aria-label="Product filters">
+        <div class="filter-block">
+          <p class="filter-title">Categories</p><a class="@(Model.SelectedCategory is null ? "is-active" : "")"
+                                                 asp-controller="Shop" asp-action="Index" asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">All
+          pieces</a>@foreach (var category in Model.Categories) {
+          <a
+          class="@(Model.SelectedCategory == category ? "is-active" : "")" asp-controller="Shop" asp-action="Index"
+          asp-route-category="@category" asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">@category</a>
+        }
+      </div>
+      <div class="filter-block shop-search">
+        <p class="filter-title">Search</p>
+        <form asp-controller="Shop" asp-action="Index" method="get"><input type="search" name="search"
+                                                                             value="@Model.Search" placeholder="Search pieces" aria-label="Search products" /><button type="submit"
+                                                                                                   aria-label="Submit product search">&rarr;</button></form>
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+          <a class="text-link" asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-sort="@Model.Sort">Clear search</a>
+        }
+        </div>
+      </aside>
+      <section class="shop-results" aria-live="polite">
+        @if (Model.Products.Count == 0)
+        {
+          <div class="empty-results">
+            <p class="eyebrow">Nothing found</p>
+            <h2>Try another search.</h2><a class="button button--dark" asp-controller="Shop" asp-action="Index">View all
+            pieces <span aria-hidden="true">&rarr;</span></a>
+          </div>
+        }
+        else
+        {
+          <div class="product-grid">@foreach (var product in Model.Products) {
+            <partial name="_CatalogProductCard" model="product" />
+          }
+        </div>
+      }
+    </section>
+  </div>
+</div>
+</main>

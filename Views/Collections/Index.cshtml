@@ -1,0 +1,40 @@
+@model AARCHIZZ.Models.CollectionsViewModel
+@{
+  ViewData["Title"] = "Collections";
+}
+<main class="collections-page">
+  <section class="collections-hero">
+    <div class="container">
+      <p class="eyebrow">Find your signature</p>
+      <h1>Collections</h1>
+      <p>Explore the shapes, textures and small details that make a bag entirely yours.</p>
+    </div>
+  </section>
+  <section class="section collection-landing">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Curated edits</p>
+          <h2>Browse by collection</h2>
+        </div><a class="text-link" asp-controller="Shop" asp-action="Index">Shop all pieces <span
+        aria-hidden="true">&rarr;</span></a>
+      </div>
+      <div class="collection-grid">
+        <a class="collection-card collection-card--feature" asp-controller="Collections" asp-action="Details"
+           asp-route-slug="new-arrivals"><img
+          src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1200&q=85"
+          alt="New arrivals collection" /><span class="collection-card__shade"></span><span
+          class="collection-card__content"><small>Just in</small><strong>New Arrivals</strong><span>Explore edit
+          &rarr;</span></span></a>
+            @foreach (var collection in Model.Collections)
+            {
+              <a class="collection-card" asp-controller="Collections"
+                 asp-action="Details" asp-route-slug="@collection.Slug"><img src="@collection.ImageUrl"
+                                                                            alt="@collection.Name collection" loading="lazy" /><span class="collection-card__shade"></span><span
+                class="collection-card__content"><small>@collection.Description</small><strong>@collection.Name</strong><span>Explore
+                edit &rarr;</span></span></a>
+              }
+            </div>
+          </div>
+        </section>
+      </main>

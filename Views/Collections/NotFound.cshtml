@@ -1,0 +1,11 @@
+@model string
+@{
+  ViewData["Title"] = "Collection not found";
+}
+<main class="not-found">  <div class="container">
+  <p class="eyebrow">AARCHIZZ collections</p>
+  <h1>That collection is not here.</h1>
+  <p>Try exploring the full collection instead.</p><a class="button button--dark" asp-controller="Collections"
+                                                      asp-action="Index">View collections <span aria-hidden="true">&rarr;</span></a>
+</div>
+</main>

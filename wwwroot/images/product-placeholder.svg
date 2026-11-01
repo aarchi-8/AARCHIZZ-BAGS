@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 980" role="img" aria-labelledby="title desc">
+  <title id="title">AARCHIZZ product image placeholder</title>
+  <desc id="desc">A warm neutral placeholder for a product without an image.</desc>
+  <rect width="800" height="980" fill="#e8ded1"/>
+  <path d="M235 590c0-130 74-210 165-210s165 80 165 210v170H235z" fill="#c1ae9a"/>
+  <path d="M315 405c0-88 34-135 85-135s85 47 85 135" fill="none" stroke="#9b8976" stroke-width="24" stroke-linecap="round"/>
+  <text x="400" y="850" fill="#756f69" font-family="Georgia,serif" font-size="28" text-anchor="middle" letter-spacing="6">AARCHIZZ</text>
+</svg>

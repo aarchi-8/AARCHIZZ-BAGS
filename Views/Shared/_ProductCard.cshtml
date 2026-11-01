@@ -1,0 +1,65 @@
+@model AARCHIZZ.Models.ProductCard
+
+<article class="product-card">
+  <a class="product-card__image-link" asp-controller="Shop" asp-action="Details" asp-route-slug="@Model.Slug"
+     aria-label="View @Model.Name">
+    <div class="product-card__image-wrap">
+      <img class="product-card__image" src="@Model.ImageUrl" alt="@Model.Name handbag" loading="lazy" />
+      @if (!string.IsNullOrWhiteSpace(Model.Label))
+      {
+        <span class="product-card__label">@Model.Label</span>
+      }
+      <span class="product-card__quick-view">View piece</span>
+    </div>
+  </a>
+  <div class="product-card__details">
+    <h3><a asp-controller="Shop" asp-action="Details" asp-route-slug="@Model.Slug">@Model.Name</a></h3>
+    <div class="product-card__price">
+      @if (!string.IsNullOrWhiteSpace(Model.SalePrice))
+      {
+        <span class="product-card__sale-price">@Model.SalePrice</span>
+        <span class="product-card__original-price">@Model.Price</span>
+        <span class="product-card__discount">@Model.DiscountLabel</span>
+      }
+      else
+      {
+        <span>@Model.Price</span>
+      }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+    {
+      <p class="product-card__description">@Model.ShortDescription</p>
+    }
+    @if (Model.Colors.Count > 0)
+    {
+      <p class="product-card__colors">Colors: @string.Join(", ", Model.Colors)</p>
+    }
+    @if (!Model.IsAvailable)
+    {
+      <p class="product-card__availability">Currently unavailable</p>
+    }
+    @if (Model.IsAvailable)
+    {
+      <form class="card-add-form" asp-controller="Cart" asp-action="Add" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="productId" value="@Model.Id" />
+        <input type="hidden" name="quantity" value="1" />
+        <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+        @if (Model.AvailableVariants.Count > 0)
+        {
+          <label class="visually-hidden" for="home-variant-@Model.Id">Choose an option for @Model.Name</label>
+          <select id="home-variant-@Model.Id" name="variantId" aria-label="Choose an option for @Model.Name">
+            @foreach (var variant in Model.AvailableVariants)
+            {
+              <option value="@variant.Id">@variant.Label</option>
+            }
+          </select>
+        }
+        <div class="card-purchase-buttons">
+          <button class="button button--dark" type="submit">Add to Bag <span aria-hidden="true">&rarr;</span></button>
+          <button class="button button--whatsapp" type="submit" formaction="@Url.Action("BuyNow", "Cart")" formtarget="_blank">Buy Now <span aria-hidden="true">↗</span></button>
+        </div>
+      </form>
+    }
+  </div>
+</article>

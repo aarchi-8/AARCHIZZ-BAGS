@@ -1,0 +1,68 @@
+# Build output
+bin/
+obj/
+out/
+
+# Visual Studio, VS Code, and user-specific IDE files
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.user
+*.userosscache
+*.suo
+*.rsuser
+
+# Local tooling, temporary diagnostics, and generated reports
+.tmp/
+.tmp-*/
+tmp/
+temp/
+diagnostics/
+**/Diagnostic*/
+**/*Diagnostic*/
+*.log
+*.tlog
+*.cache
+
+# Local configuration and secrets
+appsettings.*.json
+!appsettings.json
+!appsettings.Example.json
+.env
+.env.*
+!.env.example
+secrets.json
+secrets.*.json
+*credentials*.json
+*secrets*.json
+
+# Local databases and backups
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ndf
+*.ldf
+*.bak
+*.dump
+*.dmp
+
+# Local uploaded product/category images
+uploads/
+**/uploads/
+wwwroot/uploads/
+wwwroot/images/uploads/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Package and generated archives
+*.nupkg
+*.snupkg
+*.zip
+*.7z
+*.rar

@@ -1,0 +1,17 @@
+@model AARCHIZZ.Models.AdminProductDeleteViewModel
+@{
+  ViewData["Title"] = "Delete product";
+}
+<main class="admin-products-page">  <div class="container admin-products">
+  <section class="admin-create-panel admin-delete-panel">
+    <p class="eyebrow">Catalogue management</p>
+    <h1>Delete product?</h1>
+    <p class="admin-auth-intro">You are about to permanently delete <strong>@Model.Name</strong> (@Model.Sku). Any
+      related database images and variants will be removed through the existing cascade relationships.</p>
+      <form asp-controller="AdminProducts" asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post"><button
+        class="button button--danger" type="submit">Delete permanently <span
+        aria-hidden="true">&rarr;</span></button><a class="admin-auth-back" asp-controller="AdminProducts"
+                                                    asp-action="Index">Cancel</a></form>
+      </section>
+    </div>
+  </main>

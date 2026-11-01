@@ -1,0 +1,98 @@
+@model AARCHIZZ.Models.AdminProductListViewModel
+@{
+  ViewData["Title"] = "Products";
+}
+<main class="admin-products-page">
+  <div class="container admin-products">
+    <div class="admin-products__header">
+      <div>
+        <p class="eyebrow">Catalogue management</p>
+        <h1>Products</h1>
+        <p>Manage the database catalogue without changing storefront content yet.</p>
+      </div><div class="admin-products__header-actions"><a class="button button--dark" asp-controller="AdminCategories" asp-action="Index">Manage categories <span aria-hidden="true">&rarr;</span></a><a class="button button--dark" asp-controller="AdminProducts" asp-action="Create">Create product <span
+      aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    @if (TempData["AdminProductMessage"] is string message)
+    {
+      <div class="admin-form__success" role="status">@message
+      </div>
+    }
+    <form class="admin-product-filters" asp-controller="AdminProducts" asp-action="Index" method="get">
+      <div><label for="product-search">Search</label><input id="product-search" name="search" value="@Model.Search"
+                                                              placeholder="Name, SKU or slug" /></div>
+        <div><label for="category-filter">Category</label><select id="category-filter" name="categoryId">
+          <option value="">All categories</option>@foreach (var category in Model.Categories) {
+          <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+        }
+      </select></div>
+      <div><label for="publication-filter">Publication</label><select id="publication-filter" name="published">
+        <option value="">All statuses</option>
+        <option value="true" selected="@(Model.Published == true)">Published</option>
+        <option value="false" selected="@(Model.Published == false)">Unpublished</option>
+      </select></div><button class="button button--dark" type="submit">Filter <span
+      aria-hidden="true">&rarr;</span></button>
+    </form>
+    <div class="admin-products__summary"><span>@Model.TotalProducts product@(Model.TotalProducts == 1 ? "" :
+                "s")</span><span>Page @Model.Page of @Model.TotalPages</span></div>
+      @if (Model.Products.Count == 0)
+      {
+        <section class="admin-empty">
+          <p class="eyebrow">Catalogue is empty</p>
+          <h2>No database products yet.</h2>
+          <p>Create the first product when you are ready. No demo products have been added.</p><a
+          class="button button--dark" asp-controller="AdminProducts" asp-action="Create">Create product <span
+          aria-hidden="true">&rarr;</span></a>
+        </section>
+      }
+      else
+      {
+
+        <div class="admin-product-table-wrap">
+          <table class="admin-product-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>@foreach (var product in Model.Products) {
+              <tr>
+                <td><strong>@product.Name</strong><small>@product.Slug</small></td>
+                <td>@product.Sku</td>
+                <td>@product.Category.Name</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>@product.StockQuantity</td>
+                <td><span
+                  class="admin-status @(product.IsPublished ? "admin-status--published" : "admin-status--draft")">@(product.IsPublished
+                                                    ? "Published" : "Unpublished")</span></td>
+                  <td class="admin-product-actions"><a asp-controller="AdminProducts" asp-action="Edit"
+                                                         asp-route-id="@product.Id">Edit</a><a asp-controller="AdminProducts" asp-action="Delete"
+                                                          asp-route-id="@product.Id">Delete</a>
+                    <form asp-controller="AdminProducts" asp-action="@(product.IsPublished ? "Unpublish" : "Publish")"
+                          asp-route-id="@product.Id" method="post"><button type="submit">@(product.IsPublished ? "Unpublish" :
+                                       "Publish")</button></form>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @if (Model.TotalPages > 1)
+        {
+          <nav class="admin-pagination" aria-label="Product pages">@for (var pageNumber = 1;
+            pageNumber <= Model.TotalPages; pageNumber++) {
+              <a class="@(pageNumber == Model.Page ? "is-active" : "")" asp-controller="AdminProducts" asp-action="Index"
+                 asp-route-page="@pageNumber" asp-route-search="@Model.Search" asp-route-categoryId="@Model.CategoryId"
+                 asp-route-published="@Model.Published">@pageNumber</a>
+            }
+          </nav>
+        }
+      </div>
+    </main>

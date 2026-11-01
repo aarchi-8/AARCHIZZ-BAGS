@@ -1,0 +1,326 @@
+@model AARCHIZZ.Models.ProductDetailsViewModel
+@{
+    var product = Model.Product;
+    ViewData["Title"] = product.SeoTitle ?? product.Name;
+    ViewData["MetaDescription"] = product.SeoMetaDescription ?? product.ShortDescription;
+
+    var placeholders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "none", "null", "n/a", "na", "unknown", "not provided", "not applicable", "-"
+    };
+    bool HasContent(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && !placeholders.Contains(value.Trim().TrimEnd('.', '!'));
+
+    var brand = HasContent(product.Brand) ? product.Brand!.Trim() : "AARCHIZZ";
+    var description = HasContent(product.ShortDescription) ? product.ShortDescription : product.Description;
+    if (!HasContent(description)) description = null;
+    if (description?.Length > 420) description = description[..417].TrimEnd() + "...";
+
+    var variants = product.Variants.ToList();
+    var stockedVariants = variants
+        .Where(variant => InventoryAvailability.GetAvailableQuantity(product.StockQuantity, variant.StockQuantity, variant.IsAvailable, true) > 0)
+        .ToList();
+    var selectedVariant = stockedVariants.FirstOrDefault();
+    var showVariantOptions = variants.Count > 1;
+    var canAddToBag = variants.Count > 0 ? selectedVariant is not null : product.StockQuantity > 0;
+    var initialAvailableQuantity = selectedVariant is not null
+        ? InventoryAvailability.GetAvailableQuantity(product.StockQuantity, selectedVariant.StockQuantity, selectedVariant.IsAvailable, true)
+        : Math.Max(0, product.StockQuantity);
+
+    var colors = showVariantOptions
+        ? new List<string>()
+        : variants.Count > 0
+            ? stockedVariants.Select(variant => variant.Color)
+                .Where(HasContent).Select(color => color!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : product.StockQuantity > 0 && HasContent(product.Color)
+                ? [product.Color!.Trim()]
+                : [];
+
+    var dimensionParts = new List<string>();
+    var dimensionUnit = HasContent(product.DimensionUnit) ? product.DimensionUnit!.Trim() : null;
+    if (dimensionUnit is not null)
+    {
+        if (product.Height is > 0) dimensionParts.Add($"H {product.Height:0.###}");
+        if (product.Width is > 0) dimensionParts.Add($"W {product.Width:0.###}");
+        if (product.Length is > 0) dimensionParts.Add($"D {product.Length:0.###}");
+    }
+    var dimensions = dimensionParts.Count > 0
+        ? $"{string.Join(" × ", dimensionParts)} {dimensionUnit}"
+        : HasContent(product.Dimensions) ? product.Dimensions!.Trim() : null;
+
+    var weightUnit = HasContent(product.WeightUnit) ? product.WeightUnit!.Trim() : null;
+    var weight = product.Weight is > 0 && weightUnit is not null
+        ? $"{product.Weight:0.###} {weightUnit}"
+        : null;
+
+    var variantPrice = selectedVariant?.PriceOverride is > 0
+        ? selectedVariant.PriceOverride.Value
+        : product.Price;
+    var salePrice = product.SalePrice is > 0 and var sale && sale < variantPrice ? sale : (decimal?)null;
+    var currencyCode = HasContent(product.CurrencyCode) ? product.CurrencyCode.Trim().ToUpperInvariant() : "INR";
+    var formatPrice = (decimal value) => currencyCode == "INR"
+        ? $"₹{value:N2}"
+        : $"{value:N2} {currencyCode}";
+}
+<main class="product-page">
+    <div class="container product-detail">
+        <a class="back-link" asp-controller="Shop" asp-action="Index">&larr; Back to shop</a>
+        <div class="product-detail__layout">
+            <div class="product-gallery">
+                <div class="product-gallery__main">
+                    <img src="@product.Gallery.FirstOrDefault(product.ImageUrl)"
+                         alt="@(product.GalleryImages.FirstOrDefault()?.AltText ?? product.Name)" id="product-image" />
+                </div>
+                @if (product.Gallery.Count > 1)
+                {
+                    <div class="product-gallery__thumbs">
+                        @foreach (var image in product.GalleryImages)
+                        {
+                            <button type="button" class="gallery-thumb" data-image="@image.Url"
+                                    data-alt="@(image.AltText ?? product.Name)" aria-label="View another product image">
+                                <img src="@image.Url" alt="@(image.AltText ?? $"{product.Name} alternate view")" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            <section class="product-detail__info" aria-labelledby="product-title">
+                <p class="product-brand">@brand</p>
+                <p class="eyebrow">@product.Category</p>
+                <h1 id="product-title">@product.Name</h1>
+                <div class="product-detail__price" id="product-price"
+                     data-sale-price="@(product.SalePrice?.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                     data-currency="@currencyCode">
+                    @if (salePrice.HasValue)
+                    {
+                        <span class="product-card__sale-price" data-sale>@formatPrice(salePrice.Value)</span>
+                        <span class="product-card__original-price" data-original>@formatPrice(variantPrice)</span>
+                        <span class="product-card__discount" data-discount>@($"{(1m - salePrice.Value / variantPrice) * 100m:0}% off")</span>
+                        <span data-regular hidden></span>
+                    }
+                    else
+                    {
+                        <span data-regular>@formatPrice(variantPrice)</span>
+                        <span class="product-card__sale-price" data-sale hidden></span>
+                        <span class="product-card__original-price" data-original hidden></span>
+                        <span class="product-card__discount" data-discount hidden></span>
+                    }
+                </div>
+                @if (HasContent(description))
+                {
+                    <p class="product-detail__description">@description</p>
+                }
+
+                @if (showVariantOptions)
+                {
+                    <div class="detail-option">
+                        <span class="detail-option__label">Choose an available option</span>
+                        <div class="color-options" role="group" aria-label="Product options">
+                            @foreach (var variant in variants)
+                            {
+                                var availableQuantity = InventoryAvailability.GetAvailableQuantity(product.StockQuantity, variant.StockQuantity, variant.IsAvailable, true);
+                                var canSelect = availableQuantity > 0;
+                                var labelParts = new[] { variant.Color, variant.Size }.Where(HasContent).Select(value => value!.Trim()).ToList();
+                                var optionLabel = labelParts.Count > 0 ? string.Join(" · ", labelParts) : variant.Name.Trim();
+                                var optionPrice = variant.PriceOverride is > 0 ? variant.PriceOverride.Value : product.Price;
+                                <button type="button" class="color-option variant-option"
+                                        data-variant-option
+                                        value="@variant.Id"
+                                        data-stock="@availableQuantity"
+                                        data-price="@optionPrice.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                        aria-pressed="@(canSelect && selectedVariant?.Id == variant.Id ? "true" : "false")"
+                                        disabled="@(!canSelect)">
+                                    @optionLabel@if (!canSelect) { <span> · Unavailable</span> }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (colors.Count > 0)
+                {
+                    <div class="detail-option">
+                        <span class="detail-option__label">Available color</span>
+                        <div class="color-options">
+                            @foreach (var color in colors)
+                            {
+                                <span class="color-option">@color</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <p class="availability @(selectedVariant is null && variants.Count > 0 || selectedVariant is null && product.StockQuantity <= 0 ? "availability--unavailable" : "")"
+                   id="product-stock" role="status"
+                   data-variant-inventory="@(variants.Count > 0 ? "true" : "false")">
+                    @if (variants.Count > 0)
+                    {
+                        if (selectedVariant is not null)
+                        {
+                            @:In stock
+                        }
+                        else
+                        {
+                            @:Out of stock
+                        }
+                    }
+                    else if (product.StockQuantity > 0)
+                    {
+                        @:In stock
+                    }
+                    else
+                    {
+                        @:Out of stock
+                    }
+                </p>
+
+                <form class="detail-add-form" asp-controller="Cart" asp-action="Add" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@product.Id" />
+                    <input type="hidden" id="selected-variant-id" name="variantId" value="@selectedVariant?.Id" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                    <label for="cart-quantity">Quantity</label>
+                    <input id="cart-quantity" name="quantity" type="number" min="1" max="@initialAvailableQuantity" value="1" required />
+                    <div class="detail-purchase-buttons">
+                        <button class="button button--dark" id="add-to-bag" type="submit" disabled="@(!canAddToBag)">
+                            Add to Bag <span aria-hidden="true">&rarr;</span>
+                        </button>
+                        <button class="button button--whatsapp" type="submit" formaction="@Url.Action("BuyNow", "Cart")" formtarget="_blank" disabled="@(!canAddToBag)">
+                            Buy Now <span aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                    @if (!canAddToBag)
+                    {
+                        <p class="detail-add-form__unavailable" role="status">
+                            @(variants.Count > 0 ? "No product options are currently in stock." : "This product is currently out of stock.")
+                        </p>
+                    }
+                </form>
+
+                @if (HasContent(product.StyleCode)
+                    || HasContent(product.Material)
+                    || HasContent(product.LiningMaterial)
+                    || HasContent(product.Pattern)
+                    || HasContent(product.Finish)
+                    || HasContent(dimensions)
+                    || HasContent(weight)
+                    || HasContent(product.ClosureType)
+                    || product.CompartmentCount is >= 0
+                    || product.PocketCount is >= 0
+                    || HasContent(product.ProductType)
+                    || HasContent(product.HandleStrapType)
+                    || colors.Count > 0)
+                {
+                    <section class="product-specifications" aria-labelledby="specifications-title">
+                        <h2 id="specifications-title">Product Details</h2>
+                        <dl>
+                            @if (HasContent(product.StyleCode)) { <div><dt>Style / model</dt><dd>@product.StyleCode</dd></div> }
+                            @if (HasContent(product.Material)) { <div><dt>Outer material</dt><dd>@product.Material</dd></div> }
+                            @if (HasContent(product.LiningMaterial)) { <div><dt>Lining</dt><dd>@product.LiningMaterial</dd></div> }
+                            @if (HasContent(product.Pattern)) { <div><dt>Pattern / design</dt><dd>@product.Pattern</dd></div> }
+                            @if (HasContent(product.Finish)) { <div><dt>Finish</dt><dd>@product.Finish</dd></div> }
+                            @if (HasContent(dimensions)) { <div><dt>Dimensions</dt><dd>@dimensions</dd></div> }
+                            @if (HasContent(weight)) { <div><dt>Weight</dt><dd>@weight</dd></div> }
+                            @if (HasContent(product.ClosureType)) { <div><dt>Closure</dt><dd>@product.ClosureType</dd></div> }
+                            @if (product.CompartmentCount is >= 0) { <div><dt>Compartments</dt><dd>@product.CompartmentCount</dd></div> }
+                            @if (product.PocketCount is >= 0) { <div><dt>Pockets</dt><dd>@product.PocketCount</dd></div> }
+                            @if (HasContent(product.ProductType)) { <div><dt>Bag type</dt><dd>@product.ProductType</dd></div> }
+                            @if (HasContent(product.HandleStrapType)) { <div><dt>Carry / straps</dt><dd>@product.HandleStrapType</dd></div> }
+                            @if (!showVariantOptions && colors.Count > 0) { <div><dt>Color</dt><dd>@string.Join(", ", colors)</dd></div> }
+                        </dl>
+                    </section>
+                }
+
+                @if (HasContent(product.PackageContents))
+                {
+                    <section class="product-extra"><h2>Package contents</h2><p>@product.PackageContents</p></section>
+                }
+                @if (HasContent(product.CareInstructions))
+                {
+                    <section class="product-extra"><h2>Care</h2><p>@product.CareInstructions</p></section>
+                }
+                @if (HasContent(product.ShippingInformation) || HasContent(product.ShippingPolicyReference))
+                {
+                    <section class="product-extra"><h2>Shipping</h2>
+                        @if (HasContent(product.ShippingInformation)) { <p>@product.ShippingInformation</p> }
+                        @if (HasContent(product.ShippingPolicyReference)) { <p>@product.ShippingPolicyReference</p> }
+                    </section>
+                }
+                @if (HasContent(product.ReturnInformation) || HasContent(product.ReturnPolicyReference))
+                {
+                    <section class="product-extra"><h2>Returns</h2>
+                        @if (HasContent(product.ReturnInformation)) { <p>@product.ReturnInformation</p> }
+                        @if (HasContent(product.ReturnPolicyReference)) { <p>@product.ReturnPolicyReference</p> }
+                    </section>
+                }
+                @if (HasContent(product.WarrantyInformation))
+                {
+                    <section class="product-extra"><h2>Warranty</h2><p>@product.WarrantyInformation</p></section>
+                }
+
+            </section>
+        </div>
+    </div>
+</main>
+@section Scripts {
+    <script>
+        (() => {
+            const pricePanel = document.querySelector('#product-price');
+            const stockPanel = document.querySelector('#product-stock');
+            const selectedVariantId = document.querySelector('#selected-variant-id');
+            const quantityInput = document.querySelector('#cart-quantity');
+            const addButton = document.querySelector('#add-to-bag');
+            const options = document.querySelectorAll('[data-variant-option]');
+            const currency = pricePanel?.dataset.currency || 'INR';
+            const format = value => currency === 'INR'
+                ? '₹' + value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + currency;
+
+            function updatePrice(price) {
+                if (!pricePanel) return;
+                const sale = Number(pricePanel.dataset.salePrice);
+                const validSale = Number.isFinite(sale) && sale > 0 && sale < price;
+                const regular = pricePanel.querySelector('[data-regular]');
+                const saleElement = pricePanel.querySelector('[data-sale]');
+                const original = pricePanel.querySelector('[data-original]');
+                const discount = pricePanel.querySelector('[data-discount]');
+
+                regular.hidden = validSale;
+                saleElement.hidden = !validSale;
+                original.hidden = !validSale;
+                discount.hidden = !validSale;
+                if (validSale) {
+                    saleElement.textContent = format(sale);
+                    original.textContent = format(price);
+                    discount.textContent = Math.round((1 - sale / price) * 100) + '% off';
+                } else {
+                    regular.textContent = format(price);
+                }
+            }
+
+            options.forEach(option => option.addEventListener('click', () => {
+                options.forEach(item => item.setAttribute('aria-pressed', item === option ? 'true' : 'false'));
+                selectedVariantId.value = option.value;
+                quantityInput.max = option.dataset.stock;
+                if (Number(quantityInput.value) > Number(option.dataset.stock)) quantityInput.value = option.dataset.stock;
+                addButton.disabled = false;
+                stockPanel.textContent = 'In stock';
+                stockPanel.classList.remove('availability--unavailable');
+                updatePrice(Number(option.dataset.price));
+            }));
+
+            const initial = document.querySelector('[data-variant-option][aria-pressed="true"]');
+            if (initial) {
+                selectedVariantId.value = initial.value;
+                quantityInput.max = initial.dataset.stock;
+                updatePrice(Number(initial.dataset.price));
+            }
+        })();
+
+        document.querySelectorAll('.gallery-thumb').forEach(button => button.addEventListener('click', () => {
+            const image = document.querySelector('#product-image');
+            image.src = button.dataset.image;
+            image.alt = button.dataset.alt;
+        }));
+    </script>
+}

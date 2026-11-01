@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1000" role="img" aria-labelledby="title desc">
+  <title id="title">AARCHIZZ category image placeholder</title>
+  <desc id="desc">A soft cream and beige abstract arch for a category without an image.</desc>
+  <rect width="900" height="1000" fill="#eee6dc"/>
+  <circle cx="710" cy="180" r="115" fill="#e2d5c6"/>
+  <path d="M180 820V455a270 270 0 0 1 540 0v365H180Z" fill="#d7c6b4"/>
+  <path d="M280 820V465a170 170 0 0 1 340 0v355H280Z" fill="#eee6dc"/>
+  <path d="M0 850c160-74 277-18 420 17s290 55 480-23v156H0Z" fill="#c9b6a2"/>
+  <text x="450" y="935" fill="#756f69" font-family="Georgia,serif" font-size="27" text-anchor="middle" letter-spacing="7">AARCHIZZ</text>
+</svg>

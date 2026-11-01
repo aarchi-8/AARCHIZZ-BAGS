@@ -1,0 +1,62 @@
+@model AARCHIZZ.Models.CatalogProduct
+<article class="product-card">
+  <a class="product-card__image-link" asp-controller="Shop" asp-action="Details" asp-route-slug="@Model.Slug"
+     aria-label="View @Model.Name">
+    <div class="product-card__image-wrap"><img class="product-card__image" src="@Model.ImageUrl"
+                                                 alt="@Model.Name handbag" loading="lazy" />@if (!string.IsNullOrWhiteSpace(Model.Label)) {
+      <span
+      class="product-card__label">@Model.Label</span>
+    }
+    <span class="product-card__quick-view">View piece</span></div>
+  </a>
+  <div class="product-card__details">
+    <h3><a asp-controller="Shop" asp-action="Details" asp-route-slug="@Model.Slug">@Model.Name</a></h3>
+    <div class="product-card__price">@if (Model.SalePrice is > 0 && Model.SalePrice < Model.Price) {
+      <span
+      class="product-card__sale-price">&#8377;@Model.SalePrice.Value.ToString("N2")</span><span
+      class="product-card__original-price">&#8377;@Model.Price.ToString("N2")</span>
+    } else
+    {
+      <span>&#8377;@Model.Price.ToString("N2")</span>
+    }
+  </div>
+  @if (!string.IsNullOrWhiteSpace(Model.ShortDescription ?? Model.Description))
+  {
+    <p class="product-card__description">@(Model.ShortDescription ?? Model.Description)</p>
+  }
+  @if (Model.Colors.Count > 0)
+  {
+    <p class="product-card__colors">Colors: @string.Join(", ", Model.Colors)</p>
+  }
+  @if (!Model.Variants.Any(variant => Model.StockQuantity > 0 && variant.IsAvailable)
+      && (Model.Variants.Count > 0 || Model.StockQuantity <= 0))
+  {
+    <p class="product-card__availability">Currently unavailable</p>
+  }
+  @if (Model.Variants.Any(variant => Model.StockQuantity > 0 && variant.IsAvailable)
+      || (Model.Variants.Count == 0 && Model.StockQuantity > 0))
+  {
+    <form class="card-add-form" asp-controller="Cart" asp-action="Add" method="post">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="productId" value="@Model.Id" />
+      <input type="hidden" name="quantity" value="1" />
+      <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+      @if (Model.Variants.Any(variant => Model.StockQuantity > 0 && variant.IsAvailable))
+      {
+        <label class="visually-hidden" for="catalog-variant-@Model.Id">Choose an option for @Model.Name</label>
+        <select id="catalog-variant-@Model.Id" name="variantId" aria-label="Choose an option for @Model.Name">
+          @foreach (var variant in Model.Variants.Where(variant => Model.StockQuantity > 0 && variant.IsAvailable))
+          {
+            var labelParts = new[] { variant.Color, variant.Size }.Where(value => !string.IsNullOrWhiteSpace(value)).ToList();
+            <option value="@variant.Id">@(labelParts.Count > 0 ? string.Join(" · ", labelParts) : variant.Name)</option>
+          }
+        </select>
+      }
+      <div class="card-purchase-buttons">
+        <button class="button button--dark" type="submit">Add to Bag <span aria-hidden="true">&rarr;</span></button>
+        <button class="button button--whatsapp" type="submit" formaction="@Url.Action("BuyNow", "Cart")" formtarget="_blank">Buy Now <span aria-hidden="true">↗</span></button>
+      </div>
+    </form>
+  }
+</div>
+</article>

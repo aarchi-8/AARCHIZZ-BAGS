@@ -1,0 +1,6 @@
+@model AARCHIZZ.Models.AdminProductCreateViewModel
+@{ ViewData["Title"] = "Create product"; var categories = ViewBag.Categories as IReadOnlyList<AARCHIZZ.Data.Entities.Category> ?? []; }
+<main class="admin-products-page"><div class="container admin-products"><a class="admin-auth-back" asp-action="Index">&larr; Back to products</a><section class="admin-create-panel"><p class="eyebrow">Catalogue management</p><h1>Create product</h1><p class="admin-auth-intro">Enter only verified product details. Optional details can be added later. <a asp-controller="AdminCategories" asp-action="Index">Manage categories</a></p>
+@if(categories.Count==0){<div class="admin-form__error" role="status">No published categories are available. <a asp-controller="AdminCategories" asp-action="Index">Open Category Management</a> to create and publish one.</div>}
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="admin-product-form"><partial name="_ProductForm" model="Model"/><button class="button button--dark admin-form__submit" type="submit">Create product <span aria-hidden="true">&rarr;</span></button></form></section></div></main>
+@section Scripts { <partial name="_ValidationScriptsPartial"/><script src="~/js/admin-images.js" asp-append-version="true"></script><script src="~/js/admin-variants.js" asp-append-version="true"></script> }

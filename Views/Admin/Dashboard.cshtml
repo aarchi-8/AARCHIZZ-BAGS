@@ -1,0 +1,27 @@
+@{
+  ViewData["Title"] = "Admin dashboard";
+}
+
+<main class="admin-dashboard-page">
+  <div class="container admin-dashboard">
+    <div class="admin-dashboard__header">
+      <div>
+        <p class="eyebrow">AARCHIZZ administration</p>
+        <h1>Dashboard</h1>
+        <p>Manage the database catalogue from one protected workspace.</p>
+      </div>
+      <form asp-controller="Admin" asp-action="Logout" method="post"><button class="button button--dark"
+                                                                               type="submit">Sign out <span aria-hidden="true">&rarr;</span></button></form>
+        <a class="button button--dark" asp-controller="Admin" asp-action="Account">Account settings <span
+          aria-hidden="true">&rarr;</span></a>
+          <a class="button button--dark" asp-controller="AdminProducts" asp-action="Index">Products <span
+            aria-hidden="true">&rarr;</span></a>
+          <a class="button button--dark" asp-controller="AdminCategories" asp-action="Index">Categories <span aria-hidden="true">&rarr;</span></a>
+          </div>
+          <section class="admin-dashboard__notice" aria-labelledby="admin-next-title">
+            <p class="eyebrow">Secure foundation ready</p>
+            <h2 id="admin-next-title">Your catalogue workspace is prepared.</h2>
+            <p>Manage categories and products, including publication status, product images, and catalogue details.</p>
+            </section>
+          </div>
+        </main>

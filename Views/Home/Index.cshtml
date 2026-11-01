@@ -1,0 +1,75 @@
+@model AARCHIZZ.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Bags for Every Side of Your Life";
+}
+
+<main class="home-page">
+    <section class="hero" aria-labelledby="hero-title">
+        <img class="hero__image"
+             src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=2200&q=88"
+             alt="A handbag styled for an editorial fashion portrait" />
+        <div class="hero__wash"></div>
+        <div class="container hero__content">
+            <p class="eyebrow">AARCHIZZ COLLECTION</p>
+            <h1 id="hero-title">Bags That Bring Your Style to Life.</h1>
+            <p class="hero__description">Discover handbags and everyday styles made to complement you.</p>
+            <a class="button button--light" asp-controller="Shop" asp-action="Index">EXPLORE COLLECTION <span aria-hidden="true">&rarr;</span></a>
+        </div>
+        <div class="hero__scroll" aria-hidden="true"><span></span> Scroll to explore</div>
+    </section>
+
+    <section class="section section--categories" id="collections" aria-labelledby="collections-title">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Curated for you</p>
+                    <h2 id="collections-title">Shop by Category</h2>
+                </div>
+                <a class="text-link" asp-controller="Shop" asp-action="Index">View all pieces <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <div class="category-grid">
+                @foreach (var category in Model.Categories)
+                {
+                    <a class="category-card" asp-controller="Collections" asp-action="Details" asp-route-slug="@category.Slug">
+                        <img src="@category.ImageUrl" alt="@category.Name collection" loading="lazy" />
+                        <span class="category-card__shade"></span>
+                        <span class="category-card__content"><strong>@category.Name</strong><small>@category.Description</small></span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+
+    <div class="home-flow">
+        <section class="section home-new-arrivals" id="new-arrivals" aria-labelledby="new-arrivals-title">
+            <div class="container">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Just in</p>
+                        <h2 id="new-arrivals-title">New Arrivals</h2>
+                    </div>
+                    <a class="text-link" asp-controller="Collections" asp-action="Details" asp-route-slug="new-arrivals">Shop all new <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <div class="product-grid">
+                    @foreach (var product in Model.NewArrivals)
+                    {
+                        <partial name="_ProductCard" model="product" />
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="home-about" id="about" aria-labelledby="story-title">
+            <div class="home-about__layout">
+                <img class="home-about__image"
+                     src="https://images.unsplash.com/photo-1559563458-527698bf5295?auto=format&fit=crop&w=1200&q=85"
+                     alt="Handbag and accessories arranged in a warm studio setting" loading="lazy" />
+                <div class="home-about__content">
+                    <p class="eyebrow">Our Story</p>
+                    <h2 id="story-title">AARCHIZZ BAGS</h2>
+                    <p>AARCHIZZ BAGS by Mintu General Store brings you stylish bags for everyday life and special moments. We believe in thoughtful designs, clear product details, honest service, and building lasting relationships with our customers through trust and care.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>

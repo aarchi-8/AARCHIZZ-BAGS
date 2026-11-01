@@ -1,0 +1,31 @@
+@model AARCHIZZ.Models.ShopViewModel
+@{
+  ViewData["Title"] = Model.SelectedCategory ?? "Collection";
+}
+<main class="shop-page collection-detail-page">  <section class="shop-hero">
+  <div class="container">
+    <p class="eyebrow">AARCHIZZ collection</p>
+    <h1>@Model.SelectedCategory</h1>
+    <p>Pieces selected for the way you carry your day.</p>
+  </div>
+</section>
+<div class="container shop-content">
+  <div class="shop-toolbar">
+    <p class="shop-count">@Model.Products.Count pieces</p><a class="text-link" asp-controller="Collections"
+                                                             asp-action="Index">All collections <span aria-hidden="true">&rarr;</span></a>
+  </div>@if (Model.Products.Count == 0) {
+  <div class="empty-results">
+    <p class="eyebrow">Coming soon</p>
+    <h2>This edit is taking shape.</h2><a class="button button--dark" asp-controller="Shop" asp-action="Index">Shop
+    all pieces <span aria-hidden="true">&rarr;</span></a>
+  </div>
+} else
+{
+
+  <div class="product-grid">@foreach (var product in Model.Products) {
+    <partial name="_CatalogProductCard" model="product" />
+  }
+</div>
+    }
+</div>
+</main>
